@@ -7,28 +7,36 @@ from dataclasses import dataclass, field
 
 
 @dataclass(slots=True)
-class Porfolio:
+class Portfolio:
     
     cash_weights: float
     data: pd.DataFrame
     
     assets: list[str] = field(default_factory=list, init=False)
-    weights: dict[str, float] = field(default_factory=dict, init=False)
+    weights: pd.Series = field(default_factory=lambda: pd.Series(dtype=float))
     drifts: pd.DataFrame = field(init=False)
     
     def __post_init__(self):
         self.assets = self.data.columns.tolist()
-        self.weights = {asset: 0 for asset in self.assets}
+        if self.weights.empty:
+            self.weights = pd.Series({asset: (1 - self.cash_weights) / len(self.assets) for asset in self.assets})
         self.drifts = self.data.pct_change()
 
     def __repr__(self):
         return f"""
-        Portfolio weights:
-            Cash: {self.cash_weights}
-            Weights: {self.weights}
-        Porfolio statistics:
-            Expected Return: {self.expected_return()}
-            Volatility: {self.volatility()}
+=====================
+Portfolio weights:
+
+- Cash: {self.cash_weights}
+- Weights (Round to 4 decimal places):
+{self.weights.round(4)}
+
+Porfolio statistics:
+
+- Expected Return: {self.expected_return()}
+- Volatility: {self.volatility()}
+- sharpe ratio: {self.sharpe_ratio()}
+=====================
         """
     
     def covariance(self):
@@ -42,13 +50,14 @@ class Porfolio:
 
     def expected_return(self):
         assets_expected_return = self.drifts.mean(axis=0)
-        weights = pd.Series(self.weights.values(), index=self.assets)
-        return (assets_expected_return * weights).sum()
+        return (assets_expected_return * self.weights).sum()
 
     def volatility(self):
         cov = self.covariance()
-        weights = pd.Series(self.weights.values(), index=self.assets)
-        return (weights @ cov @ weights) ** 0.5
+        return (self.weights @ cov @ self.weights) ** 0.5
+
+    def sharpe_ratio(self, rf: float = 0.0):
+        return (self.expected_return() - rf) / self.volatility()
 
     """
     ---------------------
@@ -74,22 +83,21 @@ if __name__ == "__main__":
         "MSFT": [7, 8, 9]
     })
 
-    p = Porfolio(cash_weights=0.1, data=data)
+    p = Portfolio(cash_weights=0.1, data=data)
     print(p)
 
     # test for mcgill data
     from datahandler import DataHandler
     datahandler = DataHandler()
     data = datahandler.get_all_data()
-    p = Porfolio(cash_weights=0.1, data=data)
-    p.weights = {
+    p = Portfolio(cash_weights=0.1, data=data)
+    p.weights = pd.Series({
         "FTSE All Cap": 0.2,
         "US Treasury": 0.3,
         "US MBS": 0.2,
         "Corporate": 0.1,
         "High Yield": 0.1,
         "EM Bond": 0.1
-    }
+    })
     print(p)
-    print(p.assets_expected_return())
     

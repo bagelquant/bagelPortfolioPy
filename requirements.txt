@@ -2,4 +2,5 @@
 pandas
 matplotlib
 openpyxl
+scipy
 

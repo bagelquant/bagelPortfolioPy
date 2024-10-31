@@ -22,28 +22,38 @@ Backtest --> p[plot functions]
 ### Main classes responsibilities
 
 ```mermaid
----
-title: Portfolio class
----
 classDiagram
 class Portfolio{
-    -cash_weight: float
-    -data: pd.DataFrame
+    +cash_weight: float
+    +data: pd.DataFrame
     +assets: list[str]
     +weights: dict[str, float]
 
     -__post_init__()
     -__repr__()
+    +covariance()
+    +expected_return()
+    +volatility()
+    +sharpe_ratio()
 
+    +assets_expected_return()
+    +assets_volatility()
+    +assets_sharpe_ratio()
+}
+```
+
+```mermaid
+classDiagram
+class Optimizer{
+    +portfolio: Portfolio
+    +risk_free_rate: float
+
+    -__post_init__()
+    -__repr__()
+    +optimize()
 }
 ```
 
 This is a simple project structure. Just a few classes that interact with each other. 
 
-Extand this structure to include:
-- DataHandler: 
 
-
-## `Portfolio` class
-
-- input:
