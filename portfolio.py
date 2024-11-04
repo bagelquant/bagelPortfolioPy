@@ -24,19 +24,20 @@ class Portfolio:
 
     def __repr__(self):
         return f"""
-=====================
-Portfolio weights:
+        =====================
+        Portfolio weights:
 
-- Cash: {self.cash_weights}
-- Weights (Round to 4 decimal places):
-{self.weights.round(4)}
+        - Cash: {self.cash_weights}
+        - Weights (Round to 4 decimal places):
+        {self.weights.round(4)}
 
-Porfolio statistics:
+        Porfolio statistics:
 
-- Expected Return: {self.expected_return()}
-- Volatility: {self.volatility()}
-- sharpe ratio: {self.sharpe_ratio()}
-=====================
+        - Expected Return: {self.expected_return()}
+            - Annualized: {(1 + self.expected_return()) ** 12 - 1}
+        - Volatility: {self.volatility()}
+        - sharpe ratio: {self.sharpe_ratio()}
+        =====================
         """
     
     def covariance(self):
@@ -73,6 +74,19 @@ Porfolio statistics:
 
     def assets_sharpe_ratio(self, rf: float = 0.0):
         return (self.assets_expected_return() - rf) / self.assets_volatility()
+
+    """
+    ---------------------
+    backtesting
+    ---------------------
+    """
+
+    def get_portfolio_data(self):
+        portfolio_drifts = self.drifts @ self.weights
+        portfolio_data = (1 + portfolio_drifts).cumprod()
+        portfolio_data.iloc[0] = 1
+        portfolio_data.name = "Portfolio"
+        return portfolio_data
 
 
 if __name__ == "__main__":
