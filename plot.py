@@ -12,6 +12,9 @@ from matplotlib.figure import Figure
 def fig_accumulate_return(price: pd.DataFrame) -> Figure:
     fig, ax = plt.subplots()
     price.to_excel("price.xlsx")
+
+    ax.set_ylim(0, 0.8)
+
     price_new = price / price.iloc[0]
     price_new = price_new - 1
     price_new.plot(ax=ax)
@@ -29,7 +32,7 @@ def fig_accumulate_return(price: pd.DataFrame) -> Figure:
         line.set_linewidth(0.5)
 
     # title
-    ax.set_title("Accumulated Return since 2011")
+    ax.set_title("Backtesting Accumulate Return")
     return fig
     
 
@@ -41,6 +44,9 @@ def fig_return_hist(price: pd.DataFrame, bins: int = 50) -> Figure:
 
 def fig_drawdown(price: pd.DataFrame) -> Figure:
     fig, ax = plt.subplots()
+
+    ax.set_ylim(-0.3, 0)
+
     price_new = price / price.iloc[0]
     max_drawdown_rate = (price_new - price_new.cummax()) / price_new.cummax()
     max_drawdown_rate.plot(ax=ax)
@@ -52,13 +58,14 @@ def fig_drawdown(price: pd.DataFrame) -> Figure:
     # Highlight the first column and darken the rest
     for line in ax.get_lines()[1:]:
         # line.set_color("Grey")
-        # set alpha to 0.5
-        line.set_alpha(0.5)
+
+        line.set_alpha(0.8)
         # set linewidth to 0.5
         line.set_linewidth(0.5)
 
     # title
-    ax.set_title("Max Drawdown since 2018")
+    ax.set_title("Backtesting Drawdown")
+
     return fig
 
 

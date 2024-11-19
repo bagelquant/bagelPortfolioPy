@@ -14,46 +14,55 @@ def main():
 
     # create portfolio
     data = datahandler.get_all_data()
-    # drop us mbs
-    data = data.drop(columns=["US MBS"])
     portfolio = Portfolio(cash_weights=0.1, data=data)
-    # portfolio.weights = pd.Series({
-    #     "FTSE All Cap": 0.32,
-    #     "US Treasury": 0.24,
-    #     "US MBS": 0.12,
-    #     "Corporate": 0.12,
-    #     "High Yield": 0.05,
-    #     "EM Bond": 0.15,
-    # })
+    portfolio.weights = pd.Series({
+        "FTSE All Cap": 0.22,
+        "US Treasury": 0.36,
+        "Corporate": 0.12,
+        "High Yield": 0.05,
+        "EM Bond": 0.15,
+    })
+    sum_weights = portfolio.weights.sum()
+    print(f"Sum of weights: {sum_weights}")
 
-    # optimize portfolio
-    optimizer = MeanVarianceOptimizer(portfolio)  
-    # add constraints
-    optimizer.add_constraint_sum_one_inc_cash()
-    lower_bound = pd.Series(0.1, index=portfolio.assets)
-    optimizer.add_constraint_lower_bound(lower_bound)
+    # # optimize portfolio
+    # optimizer = MeanVarianceOptimizer(portfolio)  
+    # # add constraints
+    # optimizer.add_constraint_sum_one()
+    # lower_bound = pd.Series(0.1, index=portfolio.assets)
+    # optimizer.add_constraint_lower_bound(lower_bound)
+    #
+    # new_portfolio = optimizer.optimize()  
+    # portfolio_data = new_portfolio.get_portfolio_data()
 
-    new_portfolio = optimizer.optimize()  
-    portfolio_data = new_portfolio.get_portfolio_data()
-    
-    combined_data = pd.concat([portfolio_data, data], axis=1)
-    # remove US MBS
+    # Without optimization
+    portfolio_data = portfolio.get_portfolio_data()
+
+    # equal weight benchmark, using varibale data
+    equal_weight_benchmark = data / data.iloc[0]
+    equal_weight_benchmark = equal_weight_benchmark.mean(axis=1)
+    combined_data = pd.concat([portfolio_data, equal_weight_benchmark], axis=1)
+    combined_data.columns = ["Portfolio", "Equal Weight Benchmark"]
 
     # plots
-    accumulate_return = fig_accumulate_return(combined_data.loc["2020":])
+    accumulate_return = fig_accumulate_return(portfolio_data)
     accumulate_return.show()
+
+    # accumulate_return = fig_accumulate_return(combined_data)
+    # accumulate_return.show()
     
-    # return_hist = fig_return_hist(portfolio_data)
-    # return_hist.show()
+    # drawdown = fig_drawdown(portfolio_data)
+    # drawdown.show()
+
+    # drawdown = fig_drawdown(combined_data)
+    # drawdown.show()
+
+    # save figure
+    # drawdown.savefig("drawdown.png")
     
-    drawdown = fig_drawdown(combined_data.loc["2018":])
-    drawdown.show()
-    
-    # rolling_volatility = fig_rolling_volatility(portfolio_data)
-    # rolling_volatility.show()
-    print(portfolio)
-    print(new_portfolio)
     plt.show()
+
+    print(portfolio)
    
 
 if __name__ == "__main__":

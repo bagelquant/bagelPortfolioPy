@@ -31,7 +31,7 @@ class DataHandler:
                
             # Fixed Income
             "US Treasury",
-            "US MBS",
+            # "US MBS",
             "Corporate",
             "High Yield",
             "EM Bond",
@@ -81,8 +81,9 @@ class DataHandler:
 if __name__ == "__main__":
     data_handler = DataHandler()
     data = data_handler.get_all_data()
+    data = data / data.iloc[0]
     data.plot()
     import matplotlib.pyplot as plt
     plt.show()
-    # data.to_excel('data/data_cleaned.xlsx')
+    data.to_excel('data/data_cleaned.xlsx')
     
